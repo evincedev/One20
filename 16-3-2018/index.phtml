@@ -1,0 +1,491 @@
+<?php
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
+    $base_url =    $storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB);
+?>
+<div class="shop-box"><span class="title">Shop By :</span></div>
+<div class="shop-box">
+   <div class="btn-group switch-button" id="status" data-toggle="buttons">
+      <label id="vehicle-box" class="btn btn-default btn-on btn-xs ">
+      <input type="radio" value="1" name="multifeatured_module[module_id][status]" checked="checked">Vehicle</label>
+      <label id="size" class="btn btn-default btn-off btn-xs active">
+      <input type="radio" value="0" name="multifeatured_module[module_id][status]">size</label>
+   </div>
+</div>
+<div class="shop-box vehicle-list"><a href="<?php /* @escapeNotVerified */ echo $this->getUrl('contact') ?>">Vehicle Not Listed?</a></div>
+</div>
+<div class="form search advanced find-tire">
+   <div id="loading" style="display: none;" ><span>Loading...<span></div>
+   <div class="vehicle-list-box" style="display: none;">
+      <fieldset>
+         <ul>
+            <li>
+               <select class="year" id="year" name="year" disabled="disabled">
+                  <option value="">Year</option>
+               </select>
+            </li>
+            <li>
+               <select class="year" id="make" name="make" disabled="disabled">
+                  <option value="">Make</option>
+               </select>
+            </li>
+         </ul>
+      </fieldset>
+      <fieldset>
+         <select class="year" id="model" name="model" disabled="disabled">
+            <option value="">Model</option>
+         </select>
+      </fieldset>
+      <fieldset>
+         <select class="year" id="trim" name="trim" disabled="disabled">
+            <option value="">Option</option>
+         </select>
+      </fieldset>
+      <form  action="" method="" id="find-tire-vehicle">
+         <fieldset id="fields-data">
+         </fieldset>
+         <button type="submit" id="submit-vehicle-form" title="Find Tires" class="find-tire-btn action submit primary">
+         <span>Find tires</span>
+         </button>
+      </form>
+   </div>
+   <div class="size-list-box">
+      <form  action="<?php /* @escapeNotVerified */ echo $base_url.'catalogsearch/advanced/result/' ?>" method="get" id="find-tire-size">
+         <fieldset>
+            <ul>
+               <li>
+                  <select class="year" id="tire_width" name="tire_width">
+                     <option value="">Tire Width</option>
+                     <?php $code = 'tire_width';
+                        foreach ($block->getOptions($code) as $key => $value) { ?>
+                     <option value="<?php echo $key; ?>"><?php echo $value; ?></option>
+                     <?php } ?>                        
+                  </select>
+               </li>
+               <li>
+                  <select class="year" id="aspect_ratio" name="aspect_ratio">
+                    <option value="">Aspect Ratio</option>
+                      <?php $code = 'aspect_ratio';
+                        foreach ($block->getOptions($code) as $key => $value) { 
+                            if($key != "") { ?>
+                     <option value="<?php echo $key; ?>"><?php echo $value; ?></option>
+                     <?php } } ?>  
+                  </select>
+               </li>
+            </ul>
+         </fieldset>
+         <fieldset>
+            <select class="year" id="rim_diameter" name="rim_diameter">
+              <option value="">Rim Diameter</option>
+               <?php $code = 'rim_diameter';
+                        foreach ($block->getOptions($code) as $key => $value) { 
+                            if($key != "") { ?>
+                     <option value="<?php echo $key; ?>"><?php echo $value; ?></option>
+                     <?php } } ?>  
+            </select>
+         </fieldset>
+         <fieldset>
+         </fieldset>
+         <button type="submit" id="submit-size-form" title="Find Tires" class="find-tire-btn action submit primary">
+         <span>Find tires</span>
+         </button>
+      </form>
+   </div>
+</div>
+
+
+<script type="text/javascript">
+
+    require([
+
+    'jquery'
+
+], function($) {
+
+
+
+    $("#year").change(function() {
+        var year = $("#year").val();
+        $("#make").prop("disabled", true);
+        $("#make").val('');
+        $("#model").prop("disabled", true);
+        $("#model").val('');
+        $("#trim").prop("disabled", true);
+        $("#trim").val('');
+        $.ajax({
+
+            type: "POST",
+            url: '<?php echo $base_url ?>fitment/index/tiremake/',
+            data: {
+                year: year
+            },
+
+            beforeSend: loadStart,
+
+            complete: loadStop,
+
+            success: function(data) {
+
+                $('#make').html(data);
+                $("#make").prop("disabled", false);
+
+            }
+
+        });
+
+    });
+
+    $("#make").change(function() {
+        var year = $("#year").val();
+        var make = $("#make").val();
+
+        $("#model").prop("disabled", true);
+        $("#model").val('');
+        $("#trim").prop("disabled", true);
+        $("#trim").val('');
+
+        $.ajax({
+
+            type: "POST",
+
+            url: '<?php echo $base_url ?>fitment/index/tiremodel/',
+
+            data: {
+                year: year,
+                make: make
+            },
+
+            beforeSend: loadStart,
+
+            complete: loadStop,
+
+            success: function(data) {
+
+
+
+                $('#model').html(data);
+                $("#model").prop("disabled", false);
+
+            }
+
+        });
+
+    });
+
+    $("#model").change(function() {
+        var year = $("#year").val();
+        var make = $("#make").val();
+        var model = $("#model").val();
+
+        $("#trim").prop("disabled", true);
+        $("#trim").val('');
+
+        $.ajax({
+
+            type: "POST",
+
+            url: '<?php echo $base_url ?>fitment/index/tiretrim/',
+
+            data: {
+                year: year,
+                make: make,
+                model: model
+            },
+
+            beforeSend: loadStart,
+
+            complete: loadStop,
+
+            success: function(data) {
+
+                $('#trim').html(data);
+                $("#trim").prop("disabled", false);
+
+            }
+
+        });
+
+    });
+
+    $("#trim").change(function() {
+        var year = $("#year").val();
+        var make = $("#make").val();
+        var model = $("#model").val();
+        var trim = $("#trim").val();
+        $.ajax({
+
+            type: "POST",
+
+            url: '<?php echo $base_url ?>fitment/index/tiretrimopt/',
+
+            data: {
+                year: year,
+                make: make,
+                model: model,
+                trim: trim
+            },
+            beforeSend: loadStart,
+            complete: loadStop,
+
+            success: function(data) {
+                var objJSON = JSON.parse(data);
+                if (objJSON.year) {
+                    var elements = '<input type="hidden" name="year" value="' + objJSON.year + '"><input type="hidden" name="make" value="' + objJSON.make + '"><input type="hidden" name="model" value="' + objJSON.model + '"><input type="hidden" name="trim" value="' + objJSON.trim + '">';
+                    console.log(elements);
+                    $('fieldset#fields-data').html('');
+                    $('fieldset#fields-data').append(elements);
+                    $('form#find-tire-vehicle').attr('action', objJSON.url);
+                    $('form#find-tire-vehicle').attr('method', 'post');
+                    $("#trimoption").prop("disabled", false);
+                } else {
+                    var elements1 = '<input type="hidden" name="load_index" value="' + objJSON.LoadIndex + '"><input type="hidden" name="speed_rating" value="' + objJSON.SpeedRating + '"><input type="hidden" name="tire_size" value="' + objJSON.Size + '">';
+                    $('fieldset#fields-data').html('');
+                    $('fieldset#fields-data').append(elements1);
+                    $('form#find-tire-vehicle').attr('action', '<?php echo $base_url ?>catalogsearch/advanced/result/');
+                    $('form#find-tire-vehicle').attr('method', 'get');
+                    $("#trimoption").prop("disabled", false);
+                }
+            }
+
+        });
+
+    });
+
+    $(document).ready(function() {
+
+        $.ajax({
+
+            type: "POST",
+
+            url: '<?php echo $base_url ?>fitment/index/tireyear/',
+
+            data: "check",
+
+            beforeSend: loadStart,
+
+            complete: loadStop,
+
+            success: function(data) {
+
+                $('#year').html(data);
+                $("#year").prop("disabled", false);
+
+            }
+
+        });
+
+    });
+    var tirewidthhtml = $("#tire_width").html();
+    var aspectratiohtml = $("#aspect_ratio").html();
+    var rimdiameterhtml = $("#rim_diameter").html();
+    /*$("#aspect_ratio").prop("disabled", true);
+    $("#rim_diameter").prop("disabled", true);*/
+    $("#tire_width").change(function() {
+       /* $("#aspect_ratio").prop("disabled", true);
+        $("#rim_diameter").prop("disabled", true);*/
+        var tire_width = $("#tire_width").val();
+        if(tire_width == ""){
+            $("#aspect_ratio").html(aspectratiohtml);
+            $("#rim_diameter").html(rimdiameterhtml);
+        } else {
+        $.ajax({
+            type: "POST",
+            url: '<?php echo $base_url ?>fitment/index/aspectratio/',
+            data: {
+                tire_width: tire_width,
+            },
+            beforeSend: loadStart,
+            dataType: "json",
+            complete: loadStop,
+            success: function(data) {
+                $("#aspect_ratio").html(data);
+                $("#aspect_ratio").prop("disabled", false);
+            }
+        });
+        aspect_ratio = "-";
+        $.ajax({
+                type: "POST",
+                url: '<?php echo $base_url ?>fitment/index/rimdiameter/',
+                data: {
+                    tire_width: tire_width,
+                    aspect_ratio: aspect_ratio,
+                },
+                beforeSend: loadStart,
+                dataType: "json",
+                complete: loadStop,
+                success: function(data) {
+                    $("#rim_diameter").html(data);
+                    $("#rim_diameter").prop("disabled", false);
+                }
+            });
+    }
+    });
+    $("#aspect_ratio").change(function() {
+        var tire_width = $("#tire_width").val();
+        var aspect_ratio = $("#aspect_ratio").val();
+        if(aspect_ratio == ""){$("#rim_diameter").html(rimdiameterhtml);}  else {
+            if(tire_width != ""){
+        $.ajax({
+            type: "POST",
+            url: '<?php echo $base_url ?>fitment/index/rimdiameter/',
+            data: {
+                tire_width: tire_width,
+                aspect_ratio: aspect_ratio,
+            },
+            beforeSend: loadStart,
+            dataType: "json",
+            complete: loadStop,
+            success: function(data) {
+                $("#rim_diameter").html(data);
+                $("#rim_diameter").prop("disabled", false);
+            }
+        });
+    } else {
+        $.ajax({
+                type: "POST",
+                url: '<?php echo $base_url ?>fitment/index/rimdiameter/',
+                data: {
+                    aspect_ratio: aspect_ratio,
+                },
+                beforeSend: loadStart,
+                dataType: "json",
+                complete: loadStop,
+                success: function(data) {
+                    $("#rim_diameter").html(data);
+                    $("#rim_diameter").prop("disabled", false);
+                }
+            });
+    }
+}
+    });
+
+    function loadStart() {
+
+        $('#loading').show();
+
+    }
+
+    function loadStop() {
+
+        $('#loading').hide();
+
+    }
+    $("#size").click(function() {
+        $(".vehicle-list-box").css("display", "none")
+        $(".size-list-box").css("display", "block")
+        $("#size").addClass("active")
+        $("#vehicle-box").removeClass("active")
+    });
+
+    $("#vehicle-box").click(function() {
+        $(".vehicle-list-box").css("display", "block")
+        $(".size-list-box").css("display", "none")
+        $("#size").removeClass("active")
+        $("#vehicle-box").addClass("active")
+    });
+
+    $("#bysize").click(function() {
+        $(".vehicle-list-box").css("display", "none");
+        $(".size-list-box").css("display", "block");
+        $("#size").addClass("active");
+        $("#vehicle-box").removeClass("active");
+        $('html').removeClass('nav-open');
+        setTimeout(function () {
+            $('html').removeClass('nav-before-open');
+        }, 300);
+        if($( window ).width() < 768) {
+        $('html,body').animate({
+        scrollTop: $(".shop-by-box").offset().top},
+        'slow');
+    }
+    });
+    $("#byvehicle").click(function() {
+        $(".vehicle-list-box").css("display", "block");
+        $(".size-list-box").css("display", "none");
+        $("#size").removeClass("active");
+        $("#vehicle-box").addClass("active");
+        $('html').removeClass('nav-open');
+        setTimeout(function () {
+            $('html').removeClass('nav-before-open');
+        }, 300);
+        if($( window ).width() < 768) {
+        $('html,body').animate({
+        scrollTop: $(".shop-by-box").offset().top},
+        'slow');
+        }
+    });
+
+
+    $('button#submit-vehicle-form').click(function() {
+        if ($('#year').val() == "") {
+            $('#year').addClass('errorfield');
+            setTimeout(function() {
+                $('#year').removeClass('errorfield');
+            }, 5000);
+            return false;
+        } else {
+            $('#year').removeClass('errorfield');
+        }
+        if ($('#make').val() == "") {
+            $('#make').addClass('errorfield');
+            setTimeout(function() {
+                $('#make').removeClass('errorfield');
+            }, 5000);
+            return false;
+        } else {
+            $('#make').removeClass('errorfield');
+        }
+        if ($('#model').val() == "") {
+            $('#model').addClass('errorfield');
+            setTimeout(function() {
+                $('#model').removeClass('errorfield');
+            }, 5000);
+            return false;
+        } else {
+            $('#model').removeClass('errorfield');
+        }
+        if ($('#trim').val() == "") {
+            $('#trim').addClass('errorfield');
+            setTimeout(function() {
+                $('#trim').removeClass('errorfield');
+            }, 5000);
+            return false;
+        } else {
+            $('#trim').removeClass('errorfield');
+        }
+    });
+
+    /*$('button#submit-size-form').click(function() {
+        if ($('#tire_width').val() == "") {
+            $('#tire_width').addClass('errorfield');
+            setTimeout(function() {
+                $('#tire_width').removeClass('errorfield');
+            }, 5000);
+            return false;
+        } else {
+            $('#tire_width').removeClass('errorfield');
+        }
+        if ($('#aspect_ratio').val() == "") {
+            $('#aspect_ratio').addClass('errorfield');
+            setTimeout(function() {
+                $('#aspect_ratio').removeClass('errorfield');
+            }, 5000);
+            return false;
+        } else {
+            $('#aspect_ratio').removeClass('errorfield');
+        }
+        if ($('#rim_diameter').val() == "") {
+            $('#rim_diameter').addClass('errorfield');
+            setTimeout(function() {
+                $('#rim_diameter').removeClass('errorfield');
+            }, 5000);
+            return false;
+        } else {
+            $('#rim_diameter').removeClass('errorfield');
+        }
+    });*/
+});
+</script>   
+<style type="text/css">
+.errorfield{  border: 1px solid red !important;}
+</style>
